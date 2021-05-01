@@ -1,14 +1,30 @@
 import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { auth, provider } from '../firebase';
+import { selectUserName, selectUserLoginDetails, selectUserPhoto, setUserloginDetails } from '../features/user/userSlice';
 
 const Header = (props) => {
 
+    const dispatch = useDispatch();
+    const history = useHistory();
+    const username = useSelector(selectUserName);
+    const userPhoto = useSelector(selectUserPhoto);
+
     const handleAuth = () => {
         auth.signInWithPopup(provider).then(result => {
-            console.log(result);
+            setUser(result.user);
         }).catch(error => {
             console.log(error);
         });
+    };
+
+    const setUser = (user) => {
+        dispatch(setUserloginDetails({
+            name: user.displayName,
+            email: user.email,
+            photo: user.photoURL
+        }));
     };
 
     return (
@@ -16,33 +32,41 @@ const Header = (props) => {
             <Logo>
                 <img src="/images/logo.svg" alt="disney logo" />
             </Logo>
-            <NavMenu>
-                <a href="/home">
-                    <img src="/images/home-icon.svg" alt="home-icon" />
-                    <span>HOME</span>
-                </a>
-                <a href="/home">
-                    <img src="/images/search-icon.svg" alt="search-icon" />
-                    <span>SEARCH</span>
-                </a>
-                <a href="/home">
-                    <img src="/images/watchlist-icon.svg" alt="watchlist-icon" />
-                    <span>WATCHLIST</span>
-                </a>
-                <a href="/home">
-                    <img src="/images/original-icon.svg" alt="original-icon" />
-                    <span>ORIGINALS</span>
-                </a>
-                <a href="/home">
-                    <img src="/images/movie-icon.svg" alt="movies-icon" />
-                    <span>MOVIES</span>
-                </a>
-                <a href="/home">
-                    <img src="/images/series-icon.svg" alt="series-icon" />
-                    <span>SERIES</span>
-                </a>
-            </NavMenu>
-            <Login onClick={handleAuth}>Login</Login>
+
+            {
+                !username ?
+                    <Login onClick={handleAuth}>Login</Login>
+                    :
+                    <>
+                        <NavMenu>
+                            <a href="/home">
+                                <img src="/images/home-icon.svg" alt="home-icon" />
+                                <span>HOME</span>
+                            </a>
+                            <a href="/home">
+                                <img src="/images/search-icon.svg" alt="search-icon" />
+                                <span>SEARCH</span>
+                            </a>
+                            <a href="/home">
+                                <img src="/images/watchlist-icon.svg" alt="watchlist-icon" />
+                                <span>WATCHLIST</span>
+                            </a>
+                            <a href="/home">
+                                <img src="/images/original-icon.svg" alt="original-icon" />
+                                <span>ORIGINALS</span>
+                            </a>
+                            <a href="/home">
+                                <img src="/images/movie-icon.svg" alt="movies-icon" />
+                                <span>MOVIES</span>
+                            </a>
+                            <a href="/home">
+                                <img src="/images/series-icon.svg" alt="series-icon" />
+                                <span>SERIES</span>
+                            </a>
+                        </NavMenu>
+                        <UserImg src={userPhoto} alt={username} />
+                    </>
+            }
         </Nav>
     );
 };
@@ -151,6 +175,10 @@ const Login = styled.a`
         color: #000;
         border-color: transparent;
     }
+`;
+
+const UserImg = styled.img`
+    height: 100%;
 `;
 
 export default Header;
